@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BRAND } from '@shared/brand.config.js';
-import { Screen, LegalLinks } from '../AppRoutes.jsx';
+import { Screen } from '../AppRoutes.jsx';
 import { useSession } from '../session.jsx';
 import { api } from '../api.js';
 import { usePrefs } from '../../lib/prefs.jsx';
@@ -95,7 +95,6 @@ export default function Settings() {
       </section>
 
       {me.user.isAdmin && <p><Link to="/app/admin">Open offer administration</Link></p>}
-      <LegalLinks />
     </Screen>
   );
 }

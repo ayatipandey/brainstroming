@@ -2,10 +2,11 @@ import { StrictMode, lazy, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { PrefsProvider } from './lib/prefs.jsx';
-import SiteLayout from './site/SiteLayout.jsx';
-import Home from './site/Home.jsx';
 import './styles/base.css';
 
+// Every route is split, so the app never downloads the site's motion libraries.
+const SiteLayout = lazy(() => import('./site/SiteLayout.jsx'));
+const Home = lazy(() => import('./site/Home.jsx'));
 const How = lazy(() => import('./site/How.jsx'));
 const Tiers = lazy(() => import('./site/Tiers.jsx'));
 const Faq = lazy(() => import('./site/Faq.jsx'));

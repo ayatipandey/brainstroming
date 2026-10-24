@@ -1,4 +1,5 @@
 import express from 'express';
+import compression from 'compression';
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -26,6 +27,7 @@ export const CONSENT_KINDS = ['terms', 'marketing', 'notifications', 'card_linki
 
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
+app.use(compression());
 app.use(express.json({ limit: '16kb' }));
 app.use((_req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -137,7 +139,8 @@ app.post('/api/auth/resend', requireUser, rateLimit(3, 60_000), async (req, res)
   }
 });
 
-app.get('/api/me', requireUser, (req, res) => res.json(me(req.user)));
+// Signed-out visitors get { user: null } rather than an error.
+app.get('/api/me', (req, res) => res.json(req.user ? me(req.user) : { user: null }));
 
 /* ---------- Offers ---------- */
 
@@ -338,6 +341,8 @@ app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found.' }));
 
 const dist = path.join(here, '../client/dist');
 if (existsSync(dist)) {
+  // Hashed build files never change, so browsers may keep them for a year.
+  app.use('/assets', express.static(path.join(dist, 'assets'), { immutable: true, maxAge: '365d' }));
   app.use(express.static(dist));
   app.get(/^(?!\/api).*/, (_req, res) => res.sendFile(path.join(dist, 'index.html')));
 }

@@ -39,8 +39,6 @@ export default function Rewards() {
     return `${r.title} ${merchantById(r.merchantId).name} ${CATEGORIES[categoryOf(r)].label}`.toLowerCase().includes(q);
   }), [ranked, filter, q, me.summary.stars]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!offers) return <Screen title="Rewards"><p role="status">Loading rewards</p></Screen>;
-
   return (
     <Screen title="Rewards" className="rewards">
       <p className="lead">Most likely to be used first. Rewards apply themselves when you pay with a linked card and have the points.</p>
@@ -57,8 +55,8 @@ export default function Rewards() {
           </button>
         ))}
       </div>
-      <p className="count" aria-live="polite">{matches.length} {matches.length === 1 ? 'reward' : 'rewards'}{filtering ? ' match' : ' available'}</p>
-      {matches.length ? (
+      <p className="count" aria-live="polite">{!offers ? 'Loading rewards' : `${matches.length} ${matches.length === 1 ? 'reward' : 'rewards'}${filtering ? ' match' : ' available'}`}</p>
+      {!offers ? <div className="list-loading glass-list" aria-hidden="true" /> : matches.length ? (
         <ul className="rr-list glass-list" role="list">
           {matches.map((r, i) => (
             <RewardRow key={r.id} reward={r} starred={stars.has(r.id)} onStar={onStar} to={`/app/reward/${r.id}`} top={i === 0 && !filtering} />
@@ -70,7 +68,7 @@ export default function Rewards() {
           {filtering && <button type="button" className="btn btn-quiet btn-small" onClick={() => { setQuery(''); setFilter('all'); setParams({}); }}>Show all rewards</button>}
         </div>
       )}
-      {!filtering && offers.locked.length > 0 && (
+      {offers && !filtering && offers.locked.length > 0 && (
         <section className="block" aria-labelledby="locked-h">
           <h2 id="locked-h" className="block-title">Unlock with more points</h2>
           <p className="block-sub">Tiers unlock with all the points you have earned.</p>
@@ -79,7 +77,7 @@ export default function Rewards() {
           </ul>
         </section>
       )}
-      {!filtering && offers.used.length > 0 && (
+      {offers && !filtering && offers.used.length > 0 && (
         <details className="more">
           <summary>Used rewards ({offers.used.length})</summary>
           <ul className="rr-list glass-list" role="list">{offers.used.map((r) => <RewardRow key={r.id} reward={r} used />)}</ul>

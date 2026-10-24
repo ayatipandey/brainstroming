@@ -260,3 +260,7 @@ a.rr-link:hover .rr-title { text-decoration: underline; text-decoration-thicknes
 .dev-out { margin-top: 12px; font-weight: 700; }
 .dev-mail { white-space: pre-wrap; background: #f4f4f4; padding: 12px; border-radius: 10px; font-size: 0.9rem; }
 .dev li button { min-height: 44px; margin: 4px; }
+
+/* Loading states hold their space so the page does not jump when data arrives. */
+.screen > p[role='status'] { min-height: 60vh; }
+.list-loading { min-height: 70vh; margin-top: 10px; }

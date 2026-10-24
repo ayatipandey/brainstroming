@@ -34,7 +34,8 @@ export function SessionProvider({ children }) {
 
   const refreshMe = useCallback(async () => {
     try {
-      setMe(await api('/me'));
+      const d = await api('/me');
+      setMe(d.user ? d : null);
     } catch (e) {
       if (e.status === 401) setMe(null);
       else throw e;

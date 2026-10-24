@@ -26,9 +26,13 @@ export default function Coin() {
         // Keep the flat coin.
       }
     };
+    // Wait until the page has loaded and settled, so the 3D library never
+    // competes with the first paint.
     const idle = window.requestIdleCallback || ((f) => setTimeout(f, 300));
-    idle(start);
-    return () => { cancelled = true; handle?.destroy(); };
+    let timer = 0;
+    const later = () => { timer = setTimeout(() => idle(start), 2500); };
+    if (document.readyState === 'complete') later(); else window.addEventListener('load', later, { once: true });
+    return () => { cancelled = true; clearTimeout(timer); window.removeEventListener('load', later); handle?.destroy(); };
   }, []);
 
   return (
