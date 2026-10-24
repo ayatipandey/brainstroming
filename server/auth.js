@@ -88,7 +88,8 @@ export function sameOriginWrites(req, res, next) {
   if (req.path.startsWith('/api/ingest/')) return next(); // server-to-server, key-authenticated
   const origin = req.get('origin');
   const host = req.get('x-forwarded-host') || req.get('host');
-  if (origin && new URL(origin).host !== host) return res.status(403).json({ error: 'Cross-site request refused.' });
+  const allowed = new Set([host, process.env.APP_URL && new URL(process.env.APP_URL).host].filter(Boolean));
+  if (origin && !allowed.has(new URL(origin).host)) return res.status(403).json({ error: 'Cross-site request refused.' });
   if (req.body && Object.keys(req.body).length && !req.is('application/json')) return res.status(415).json({ error: 'Send JSON.' });
   next();
 }

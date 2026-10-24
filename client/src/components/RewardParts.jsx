@@ -45,7 +45,7 @@ export function RewardRow({ reward, starred, onStar, to, locked = false, used = 
         <span className="rr-title">{reward.title}</span>
         <span className="rr-merchant">{m.name}</span>
         <span className="rr-terms">{locked ? `Unlocks at ${tierName}.` : used ? 'Used.' : keyTerms(reward)}</span>
-        {!locked && !used && reward.affordable === false && <span className="rr-need">You need more points for this one.</span>}
+        {!locked && !used && reward.affordable === false && reward.need > 0 && <span className="rr-need">Needs {reward.need.toLocaleString()} more points</span>}
       </span>
     </>
   );

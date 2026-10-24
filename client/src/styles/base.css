@@ -10,11 +10,11 @@
 :root {
   --ground: #f6f1ea;
   --ink: #012834;           /* 13:1 or better on glass */
-  --ink-2: #38515b;         /* 7:1 on glass */
-  --link: #015b7e;          /* 6.2:1 on glass */
+  --ink-2: #33494f;         /* 5.5:1 on the brightest bare field, 7:1 on glass */
+  --link: #014a66;          /* 5.6:1 on the brightest bare field */
   --green: #4bcd3e;         /* actions; text on it is --ink, 7.5:1 */
   --green-hover: #3fbf33;
-  --green-text: #1d6b14;    /* green words on light surfaces, 5.5:1 */
+  --green-text: #145010;    /* green on light surfaces, 5.5:1 or better */
   --sheet: #012834;         /* the dark bottom sheet */
   --on-sheet: #ffffff;
   --on-sheet-2: #b8ccd2;    /* 9.3:1 on the sheet */

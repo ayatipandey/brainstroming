@@ -36,7 +36,8 @@ export default defineConfig(({ command }) => ({
   server: {
     port: 5173,
     fs: { allow: ['..'] },
-    proxy: { '/api': 'http://localhost:3001' },
+    // Keep the browser's Host so the API's same-origin check sees the real site.
+    proxy: { '/api': { target: 'http://localhost:3001', changeOrigin: false } },
   },
   build: { chunkSizeWarningLimit: 700 },
 }));

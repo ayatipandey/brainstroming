@@ -31,7 +31,7 @@ export default function Rewards() {
 
   const q = query.trim().toLowerCase();
   const filtering = q !== '' || filter !== 'all';
-  const ranked = offers?.ranked || [];
+  const ranked = (offers?.ranked || []).map((r) => ({ ...r, need: r.cost - me.summary.balance }));
   const matches = useMemo(() => ranked.filter((r) => {
     if (filter === 'starred' && !stars.has(r.id)) return false;
     if (CATEGORIES[filter] && categoryOf(r) !== filter) return false;

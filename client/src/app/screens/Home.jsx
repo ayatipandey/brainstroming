@@ -82,7 +82,7 @@ export default function Home() {
 
   return (
     <Screen title={`${greeting()}, ${me.user.firstName}`} className="home">
-      <div className="home-actions-top">
+      <div className="home-actions-top" role="group" aria-label="Quick links">
         <Link to="/app/activity" className="icon-btn" aria-label="Open activity"><Icon name="activity" /></Link>
         <Link to="/app/settings" className="icon-btn" aria-label="Open settings"><Icon name="settings" /></Link>
       </div>

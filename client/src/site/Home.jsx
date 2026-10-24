@@ -81,7 +81,7 @@ export default function Home() {
               <p>Any coffee, on us, at Campus Coffee. $4.20 became $0.00.</p>
             </div>
             <div className="float float-qr" aria-hidden="true">
-              <Qr text="perkpredict:cc-coffee:demo" size={92} />
+              <Qr text="reward:cc-coffee:example" size={92} />
               <p className="float-code">PP-4K2-9QX</p>
             </div>
           </div>
@@ -92,7 +92,7 @@ export default function Home() {
         <div className="sort-copy">
           <h2 id="sort-title" className="section-title" data-split><Split>Sorted for the moment</Split></h2>
           <p className="lede">Every reward is scored for the time of day, the stores you star, and how soon it ends. The one you are most likely to use rises to the top.</p>
-          <p className="fine">Ranking at 2:47 pm for a demo member who starred Campus Coffee.</p>
+          <p className="fine">Example ranking at 2:47 pm for a member who favorited Campus Coffee.</p>
         </div>
         <ol className="deck" role="list" aria-label="Rewards in ranked order">
           {ranked.slice(0, 5).map(({ reward, why }, i) => {

@@ -40,7 +40,16 @@ export function SessionProvider({ children }) {
     setActivity(a);
     // Announce payments that arrived since we last looked.
     const fresh = a.transactions.filter((t) => t.id > seen.current).sort((x, y) => x.id - y.id);
-    if (seen.current !== 0 && fresh.length) {
+    if (seen.current !== 0 && fresh.length > 1) {
+      const applied = fresh.filter((t) => t.offerId);
+      const pts = fresh.reduce((n, t) => n + t.pointsEarned, 0);
+      setToasts((ts) => [{
+        id: `t${fresh[fresh.length - 1].id}`,
+        title: `${fresh.length} payments received`,
+        body: `You earned ${pts.toLocaleString()} points${applied.length ? ` and ${applied.length} reward${applied.length > 1 ? 's were' : ' was'} applied` : ''}. See Activity for details.`,
+      }, ...ts].slice(0, 3));
+      if (applied.length) setArrival(applied[applied.length - 1]);
+    } else if (seen.current !== 0 && fresh.length) {
       for (const t of fresh) {
         setToasts((ts) => [{
           id: `t${t.id}`,

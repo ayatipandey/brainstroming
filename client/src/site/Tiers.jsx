@@ -1,7 +1,7 @@
 import { BRAND } from '@shared/brand.config.js';
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { TIERS, REWARDS, rewardById, merchantById, termsFor } from '@shared/catalog.js';
+import { TIERS, REWARDS, rewardById, merchantById, termsFor, POINTS_PER_DOLLAR } from '@shared/catalog.js';
 import Split from '../components/Split.jsx';
 import { usePageMotion, riseHeadings } from '../lib/motion.js';
 import { usePage } from '../lib/page.js';
@@ -43,7 +43,7 @@ export default function Tiers() {
     <div ref={root} className="page tiers">
       <header className="page-head">
         <h1 ref={h1} tabIndex={-1} className="page-title" data-split><Split>Use more, unlock better</Split></h1>
-        <p className="lede">Points from using rewards and paying with your linked card add up. Each tier keeps every reward from the tiers below and adds bigger ones.</p>
+        <p className="lede">Points from paying with your linked card add up. Each tier keeps every reward from the tiers below and adds better value ones.</p>
       </header>
 
       <section className="fan-wrap" aria-labelledby="fan-h">
@@ -67,7 +67,7 @@ export default function Tiers() {
             );
           })}
         </ol>
-        <p className="fine fan-note">You earn {10} points for every dollar you pay with a linked card, plus a bonus each time you use a reward. Tiers are based on all the points you have earned and never go down in this prototype.</p>
+        <p className="fine fan-note">You earn {POINTS_PER_DOLLAR} points for every dollar you pay with a linked card. Tiers are based on all the points you have ever earned, so using points on rewards never moves you down.</p>
       </section>
 
       <section className="terms-section" aria-labelledby="terms-h">

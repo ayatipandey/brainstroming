@@ -54,7 +54,7 @@ export default function How() {
     <div ref={root} className="page how">
       <header className="page-head">
         <h1 ref={h1} tabIndex={-1} className="page-title" data-split><Split>How it works</Split></h1>
-        <p className="lede">One list, sorted for you. Show a code at the counter, or pay with your linked card and let the reward apply itself. Every reward you use moves you toward better ones.</p>
+        <p className="lede">One list, sorted for you. Show a code at the counter, or pay with your linked card and let the reward apply itself. Every purchase with a linked card earns points toward better rewards.</p>
       </header>
 
       <section className="how-row how-rank" aria-labelledby="rank-h">
@@ -77,7 +77,7 @@ export default function How() {
           <h2 id="show-h" className="section-title" data-split><Split>Show the code, or just pay</Split></h2>
           <p>Tap a reward and its QR code and a short written code appear together, so it works with a scanner or a person reading it out.</p>
           <p>Or skip the tap. Pay with a linked card and your best reward at that store applies itself, then your list, points and activity update.</p>
-          <p className="fine">Card payments are simulated in this prototype. In a real deployment they run on FIS Premium Payback.</p>
+          <p className="fine">Payments reach us through the card processor’s transaction feed, built to run on FIS Premium Payback.</p>
         </div>
         <div className="flip" aria-label="A reward card and its code">
           <div className={`flip-inner ${reduced ? 'is-static' : ''}`}>
@@ -87,7 +87,7 @@ export default function How() {
               <p className="flip-terms">{keyTerms(coffee)}</p>
             </div>
             <div className="flip-face flip-back">
-              <Qr text="perkpredict:cc-coffee:demo" size={150} />
+              <Qr text="reward:cc-coffee:example" size={150} />
               <p className="flip-code">PP-4K2-9QX</p>
               <p className="flip-hint">Scan, or read out the code</p>
             </div>
@@ -104,8 +104,8 @@ export default function How() {
 
       <section className="how-row how-tier" aria-labelledby="tier-h">
         <div className="how-copy">
-          <h2 id="tier-h" className="section-title" data-split><Split>Use rewards, unlock better ones</Split></h2>
-          <p>Using a reward earns bonus points, and paying with your linked card earns 10 points for every dollar. Points move you from Member to Silver, Gold and Platinum, and each tier unlocks bigger rewards.</p>
+          <h2 id="tier-h" className="section-title" data-split><Split>Earn points, unlock better rewards</Split></h2>
+          <p>Paying with your linked card earns 2 points for every dollar. All the points you have ever earned move you from Member to Silver, Gold and Platinum, and each tier unlocks better rewards.</p>
           <Link to="/tiers" className="text-link">See every tier</Link>
         </div>
         <div className="climb">
