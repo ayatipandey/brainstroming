@@ -26,18 +26,16 @@ Unused points are a timing and relevance problem, not a generosity problem. Typi
 
 ## Capabilities and Constraints
 
-- Predictive scoring with a "Why this offer" explanation. Rules baseline: start 0.5; minus 0.25 outside a category's usual hours, plus 0.15 inside; plus 0.15 favorite category; plus 0.10 special moment; plus 0.10 expiring points; clamp 0 to 0.99; send at 0.70 or higher. Category windows: coffee 7 to 16, food 11 to 14 and 17 to 21, books 9 to 17, groceries 10 to 20.
-- A logistic regression trained on synthetic data, exported as model.json, scores on the server; the app falls back to on-device scoring after 2 seconds.
-- Quiet by default: 70% threshold, daily limit of 1 to 3, quiet hours. Payment confirmations are always shown.
-- Expiring points first, drawn as a 14-day clock. Three-step redeem.
-- Favorite brands per category, always visible. Mock card linking (only bank name, last four digits, and spending categories are kept).
-- Auto-apply (simulated, off by default): per-purchase limit and categories; sits on FIS Premium Payback in a real deployment. Simulated payment events with confirmation, reasons, and Undo.
-- Saved-from-expiring total, five badges, daily perk reveal, calendar moments, accent-color themes, opt-in weekly challenge with anonymous demo totals, live demo control panel.
-- Roadmap (not built): cross-program balance view, expiry forecast, merchant view, validation on real FIS data after a privacy review.
+- Sign in, then one Rewards screen: tier and points, the most likely reward on top with its reasons, then all rewards ranked by likelihood. Search, category filter, and stars.
+- Reward detail shows a QR code and a written code together, plus the same eight plain-language terms on every reward.
+- A linked card (bank name and last four digits only) applies the best eligible reward automatically when you pay; the list, points and Activity update. Payments are simulated; a real deployment sits on FIS Premium Payback.
+- Tiers: Member, Silver (600), Gold (1,250), Platinum (2,500) lifetime points. 10 points per dollar paid plus a bonus per reward used. Each tier unlocks better rewards.
+- Ranking: logistic regression trained on synthetic data, compared with a rules baseline. No lift on real customers may be claimed.
+- Roadmap (not built): cross-program balances, real card payments, a merchant view, validation on real FIS data after a privacy review.
 
 ## Brand Commitments
 
-Name: Perk Predict. FIS colors: green #4bcd3e (actions), dark teal #012834 (fields), teal #015b7e, blue #285bc5. Typeface: Atkinson Hyperlegible. Plain white page. Yellow is used only on the expiry clock.
+Name: Perk Predict. The FIS color theme is no longer used (user request). Typeface: Atkinson Hyperlegible (Next). Plain white page.
 
 ## Evidence on Hand
 

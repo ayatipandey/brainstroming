@@ -24,16 +24,21 @@ const PATHS = {
   spark: 'M12 4v4M12 16v4M4 12h4M16 12h4M6.5 6.5l2 2M15.5 15.5l2 2M17.5 6.5l-2 2M8.5 15.5l-2 2',
   calendar: 'M5 6.5h14V19H5zM5 10h14M9 4v4M15 4v4',
   menu: 'M4 7h16M4 12h16M4 17h16',
+  star: 'M12 3.8l2.5 5.1 5.6.8-4 3.9.9 5.6-5-2.6-5 2.6.9-5.6-4-3.9 5.6-.8L12 3.8Z',
+  search: 'M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13ZM15.5 15.5 20 20',
+  qr: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2M14 18h2v2M18 18h2v2h-2',
+  user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 20a7.5 7.5 0 0 1 15 0',
+  rewards: 'M4.5 9h15v11h-15zM3.5 6h17v3h-17zM12 6v14M12 6c-1.6-3-5-3-5-1s3 1 5 1Zm0 0c1.6-3 5-3 5-1s-3 1-5 1Z',
 };
 
-export default function Icon({ name, size = 24, className = '', title }) {
+export default function Icon({ name, size = 24, className = '', title, filled = false }) {
   return (
     <svg
       className={`icon ${className}`}
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={filled ? 'currentColor' : 'none'}
       stroke="currentColor"
       strokeWidth="1.75"
       strokeLinecap="round"
