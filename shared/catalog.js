@@ -27,7 +27,7 @@ export const TIERS = [
   { id: 'gold', name: 'Gold', min: 1250 },
   { id: 'platinum', name: 'Platinum', min: 2500 },
 ];
-export const POINTS_PER_DOLLAR = 10;
+export const POINTS_PER_DOLLAR = 2;
 
 export const tierFor = (points) => [...TIERS].reverse().find((t) => points >= t.min);
 export const nextTier = (points) => TIERS.find((t) => t.min > points) || null;
@@ -59,6 +59,14 @@ export const REWARDS = [
   { id: 'gb-table', merchantId: 'green-bowl', tier: 'platinum', title: '$30 off a group order', value: 30, minSpend: 80, days: 30, earn: 300, terms: ['Orders for four people or more.'] },
   { id: 'fl-big', merchantId: 'fresh-lane', tier: 'platinum', title: '$25 off a $100 basket', value: 25, minSpend: 100, days: 30, earn: 300, terms: ['Alcohol and gift cards do not count toward the $100.'] },
 ];
+
+// Points each reward uses. Higher tiers get more value per point.
+const RATE = { member: 100, silver: 90, gold: 80, platinum: 70 }; // points per dollar of value
+for (const r of REWARDS) r.cost = Math.round(r.value * RATE[r.tier] / 10) * 10;
+
+export const POINT_VALUE = 0.01; // dollars per point when shown as money
+export const POINTS_EXPIRE_DAYS = 365;
+export const EXPIRY_WINDOW_DAYS = 14;
 
 // Kept for the scoring API, which picks an offer per merchant.
 export const OFFERS = REWARDS.filter((r) => r.tier === 'member').map((r) => ({ ...r, points: r.earn }));
@@ -115,11 +123,12 @@ export function termsFor(r, { autoApply = true } = {}) {
   return [
     { label: 'What you get', text: `${r.title}. Up to ${money(r.value)} off.` },
     { label: 'Where', text: `${m.name}, ${where(r)}.` },
-    { label: 'Valid until', text: `${validUntil(r.days)}, end of day.` },
+    { label: 'Valid until', text: `${r.validUntil ? new Date(`${r.validUntil}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : validUntil(r.days)}, end of day.` },
     { label: 'How many times', text: 'Once.' },
     { label: 'Minimum spend', text: r.minSpend ? `${money(r.minSpend)} before the reward.` : 'None.' },
-    { label: 'Points you earn', text: `${r.earn} bonus points when you use it, plus ${POINTS_PER_DOLLAR} points for every dollar you pay.` },
-    { label: 'Paying with a linked card', text: autoApply ? 'Applied automatically if it is your best reward at this store.' : 'Show the code, or turn on auto-apply in Account.' },
+    { label: 'Points it uses', text: `${r.cost.toLocaleString()} points, taken from the points that expire soonest.` },
+    { label: 'Points you earn', text: `${POINTS_PER_DOLLAR} points for every dollar you pay after the reward.` },
+    { label: 'Paying with a linked card', text: autoApply ? 'Applied automatically when you pay with a linked card, if you have the points and it is your best reward at that store.' : 'Show the code at the counter. Auto-apply is off for your cards.' },
     { label: 'Also', text: [...r.terms, 'Cannot be combined with other rewards on the same purchase.', 'No cash value. Not exchangeable or transferable.'].join(' ') },
   ];
 }

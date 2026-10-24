@@ -6,3 +6,5 @@ dist/
 .impeccable/config.local.json
 model/data/
 __pycache__/
+server/data/
+server/outbox/
