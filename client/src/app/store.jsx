@@ -1,200 +1,134 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
-import { PEOPLE, offerById, merchantById, POINT_VALUE, money } from '@shared/catalog.js';
-import { EXPIRY_HORIZON } from '@shared/scoring.js';
-import { evaluatePayment, takePoints, balanceOf, confirmationText, UNDO_SECONDS } from '@shared/autoApply.js';
+import { REWARDS, tierFor, nextTier, tierRank, TIERS, rewardById } from '@shared/catalog.js';
+import { rankRewards } from '@shared/rank.js';
+import { payWithCard, receiptText } from '@shared/autoApply.js';
+import model from '@shared/model.json';
 
-// All app state is demo state, kept in this browser only. Cards hold only the
-// bank name, the last four digits, and spending categories.
+// Demo state, kept in this browser only. The card keeps only the bank name
+// and the last four digits.
 
-const KEY = 'pp-state-v1';
-const today = () => new Date().toISOString().slice(0, 10);
+const KEY = 'pp-rewards-v2';
 const uid = () => Math.random().toString(36).slice(2, 10);
+const now = () => new Date().toISOString();
 
 export function initialState() {
-  const maya = PEOPLE[0];
   return {
-    account: null,
-    personId: maya.id,
-    favorites: { ...maya.favorites },
-    lots: [
-      { id: 'lot-a', points: 300, expiresInDays: 3 },
-      { id: 'lot-b', points: 1150, expiresInDays: 41 },
-      { id: 'lot-c', points: 900, expiresInDays: null },
-    ],
-    cards: [
-      { id: 'card-1', bank: 'Harbor Bank', last4: '4821', categories: ['coffee', 'food'], autoApply: { on: false, limit: 3, categories: ['coffee'] } },
-    ],
+    user: null,
+    points: 1120,
+    starred: ['cc-coffee'],
+    used: {},
+    card: { bank: 'Harbor Bank', last4: '4821', autoApply: true },
     activity: [
-      { id: 'a0', at: new Date(Date.now() - 864e5).toISOString(), kind: 'card', title: 'Linked Harbor Bank, ending 4821', detail: 'Kept: bank name, last four digits, coffee and food.' },
+      { id: 'a0', at: new Date(Date.now() - 2 * 864e5).toISOString(), kind: 'tier', title: 'You reached Silver', detail: '3 more rewards unlocked.' },
     ],
-    saved: 0,
-    perk: { date: null },
-    settings: {
-      dailyLimit: 2,
-      quiet: { on: true, start: 22, end: 7 },
-      location: false,
-      accent: 'teal',
-      challenge: false,
-    },
-    sentToday: { date: today(), count: 0 },
-    heldByQuiet: false,
-    nudges: [],
+    toasts: [],
   };
 }
 
 function load() {
   try {
     const raw = JSON.parse(localStorage.getItem(KEY));
-    const s = raw ? { ...initialState(), ...raw, nudges: [] } : initialState();
-    if (s.sentToday.date !== today()) s.sentToday = { date: today(), count: 0 };
-    // Set by the Create account page.
-    const name = localStorage.getItem('pp-account-name');
-    if (name) {
-      s.account = { name };
-      localStorage.removeItem('pp-account-name');
-    }
-    return s;
+    return raw ? { ...initialState(), ...raw, toasts: [] } : initialState();
   } catch {
     return initialState();
   }
 }
 
-const log = (s, entry) => ({ ...s, activity: [{ id: uid(), at: new Date().toISOString(), ...entry }, ...s.activity].slice(0, 80) });
+const log = (s, e) => ({ ...s, activity: [{ id: uid(), at: now(), ...e }, ...s.activity].slice(0, 60) });
 
-function applyQuote(s, q, how) {
-  const before = { lots: s.lots, saved: s.saved };
-  let next = { ...s, lots: q.lotsAfter, saved: Math.round((s.saved + q.savedFromExpiring) * 100) / 100 };
-  const paymentId = uid();
-  next = log(next, {
-    kind: 'payment',
-    paymentId,
-    title: `${q.merchant.name}, ${money(q.amount)}`,
-    detail: `${how}: ${q.points.toLocaleString()} points covered ${money(q.covered)}, you paid ${money(q.paid)}. ${q.card.bank} ending ${q.card.last4}. Simulated.`,
-    points: -q.points,
-  });
-  // Payment confirmations are always shown, whatever the nudge limit.
-  next.nudges = [{
-    id: uid(), kind: 'payment', paymentId, title: 'Points applied', body: confirmationText(q), reasons: q.reasons,
-    undoUntil: Date.now() + UNDO_SECONDS * 1000, before,
-  }, ...next.nudges.filter((n) => n.kind !== 'ask')];
+function addPoints(s, earned) {
+  const before = tierFor(s.points);
+  const points = s.points + earned;
+  const after = tierFor(points);
+  let next = { ...s, points };
+  if (tierRank(after.id) > tierRank(before.id)) {
+    const unlocked = REWARDS.filter((r) => r.tier === after.id).length;
+    next = log(next, { kind: 'tier', title: `You reached ${after.name}`, detail: `${unlocked} new rewards unlocked.` });
+    next.toasts = [{ id: uid(), kind: 'tier', title: `You reached ${after.name}`, body: `${unlocked} new rewards are unlocked and waiting in your list.` }, ...next.toasts];
+  }
   return next;
 }
 
 function reducer(s, a) {
   switch (a.type) {
-    case 'account':
-      return { ...s, account: { name: a.name } };
-    case 'person': {
-      const p = PEOPLE.find((x) => x.id === a.id);
-      return { ...s, personId: p.id, favorites: { ...p.favorites } };
+    case 'sign-in':
+      return { ...s, user: { name: a.name } };
+    case 'sign-out':
+      return { ...s, user: null };
+    case 'star': {
+      const on = s.starred.includes(a.id);
+      return { ...s, starred: on ? s.starred.filter((x) => x !== a.id) : [...s.starred, a.id] };
     }
-    case 'favorite': {
-      const favorites = { ...s.favorites };
-      if (a.merchantId) favorites[a.category] = a.merchantId; else delete favorites[a.category];
-      return { ...s, favorites };
+    case 'use': {
+      // Used at the counter with the QR or the code.
+      const r = rewardById(a.id);
+      if (s.used[r.id]) return s;
+      let next = { ...s, used: { ...s.used, [r.id]: now() } };
+      next = log(next, { kind: 'use', title: `Used: ${r.title}`, detail: `Shown at the counter. +${r.earn} points.`, points: r.earn });
+      next.toasts = [{ id: uid(), kind: 'use', title: 'Reward used', body: `${r.title}. You earned ${r.earn} points.` }, ...next.toasts];
+      return addPoints(next, r.earn);
     }
-    case 'link-card': {
-      const card = { id: uid(), bank: a.bank, last4: a.last4, categories: a.categories, autoApply: { on: false, limit: 5, categories: a.categories } };
-      return log({ ...s, cards: [...s.cards, card] }, { kind: 'card', title: `Linked ${a.bank}, ending ${a.last4}`, detail: `Kept: bank name, last four digits, ${a.categories.join(' and ')}.` });
-    }
-    case 'remove-card': {
-      const card = s.cards.find((c) => c.id === a.id);
-      return log({ ...s, cards: s.cards.filter((c) => c.id !== a.id) }, { kind: 'card', title: `Removed ${card.bank}, ending ${card.last4}`, detail: 'Nothing about this card is kept.' });
+    case 'pay': {
+      const p = payWithCard({ merchantId: a.merchantId, amount: a.amount, available: a.available, autoApply: !!s.card?.autoApply });
+      let next = s;
+      if (p.reward) next = { ...next, used: { ...next.used, [p.reward.id]: now() } };
+      next = log(next, {
+        kind: 'pay',
+        title: `${p.merchant.name}, $${p.amount.toFixed(2)}`,
+        detail: p.reward ? `${p.reward.title} applied automatically. You paid $${p.paid.toFixed(2)}.` : `No reward applied. ${p.missed ? 'Auto-apply is off.' : p.note || 'No reward at this store yet.'}`,
+        points: p.earned,
+      });
+      next.toasts = [{
+        id: uid(), kind: p.reward ? 'applied' : 'paid',
+        title: p.reward ? 'Reward applied' : 'Payment recorded',
+        body: receiptText(p) + (p.missed ? ` You had “${p.missed.title}” here; turn on auto-apply to use it next time.` : '') + (p.note ? ` ${p.note}` : ''),
+        rewardId: p.reward?.id,
+      }, ...next.toasts.filter((t) => t.kind !== 'applied' && t.kind !== 'paid')];
+      return addPoints(next, p.earned);
     }
     case 'auto-apply':
-      return { ...s, cards: s.cards.map((c) => (c.id === a.id ? { ...c, autoApply: { ...c.autoApply, ...a.patch } } : c)) };
-    case 'settings':
-      return { ...s, settings: { ...s.settings, ...a.patch } };
-    case 'decision': {
-      const r = a.result;
-      const offer = offerById(r.offerId);
-      const merchant = merchantById(offer.merchantId);
-      if (r.send) {
-        const next = log({ ...s, sentToday: { date: today(), count: s.sentToday.count + 1 } }, {
-          kind: 'nudge', title: `Nudge sent: ${offer.title}`, detail: `${merchant.name}. Scored ${Math.round(r.score * 100)}% (${r.source === 'device' ? 'on this device' : 'server model'}).`,
-        });
-        next.nudges = [{ id: uid(), kind: 'offer', offerId: offer.id, title: offer.title, body: `${merchant.name}. ${offer.points} points, worth ${money(offer.value)}.`, reasons: r.reasons, score: r.score }, ...next.nudges];
-        return next;
-      }
-      return log({ ...s, heldByQuiet: s.heldByQuiet || r.held === 'quiet-hours' }, {
-        kind: 'quiet', title: r.held === 'quiet-hours' ? 'Held for quiet hours' : r.held === 'daily-limit' ? 'Held: daily limit reached' : 'Nothing sent',
-        detail: `${merchant.name}. Scored ${Math.round(r.score * 100)}%, below or held at the 70% bar.`,
-      });
-    }
-    case 'redeem': {
-      const offer = offerById(a.offerId);
-      const take = takePoints(s.lots, offer.points);
-      const savedNow = Math.round(take.fromExpiring * POINT_VALUE * 100) / 100;
-      return log({ ...s, lots: take.lots, saved: Math.round((s.saved + savedNow) * 100) / 100 }, {
-        kind: 'redeem', title: `Redeemed: ${offer.title}`, detail: `${merchantById(offer.merchantId).name}. ${offer.points} points${take.fromExpiring ? `, ${take.fromExpiring} of them about to expire` : ''}.`, points: -offer.points,
-      });
-    }
-    case 'payment': {
-      const card = s.cards.find((c) => c.id === a.cardId);
-      const q = evaluatePayment({ card, merchantId: a.merchantId, amount: a.amount, lots: s.lots });
-      if (q.status === 'applied') return applyQuote(s, q, 'Auto-applied');
-      if (q.status === 'ask') {
-        const next = log(s, { kind: 'payment', title: `${q.merchant.name}, ${money(q.amount)}`, detail: `Paid in full on ${card.bank} ending ${card.last4}. Asked whether to apply points. Simulated.` });
-        next.nudges = [{ id: uid(), kind: 'ask', quote: q, title: 'Apply points now?', body: `${money(q.amount)} at ${q.merchant.name}. ${q.points.toLocaleString()} points can cover ${money(q.covered)}.`, reasons: q.reasons }, ...next.nudges];
-        return next;
-      }
-      return log(s, { kind: 'payment', title: `${q.merchant.name}, ${money(a.amount)}`, detail: 'No points left to apply. Simulated.' });
-    }
-    case 'confirm-ask': {
-      const n = s.nudges.find((x) => x.id === a.id);
-      if (!n) return s;
-      return applyQuote({ ...s, nudges: s.nudges.filter((x) => x.id !== a.id) }, n.quote, 'Applied after payment');
-    }
-    case 'undo': {
-      const n = s.nudges.find((x) => x.id === a.id);
-      if (!n || Date.now() > n.undoUntil) return s;
-      const next = log({ ...s, lots: n.before.lots, saved: n.before.saved, nudges: s.nudges.filter((x) => x.id !== a.id) }, {
-        kind: 'undo', title: 'Undid points on a payment', detail: 'The points are back in your balance.',
-      });
-      next.activity = next.activity.map((e) => (e.paymentId === n.paymentId ? { ...e, undone: true } : e));
-      return next;
-    }
+      return { ...s, card: { ...s.card, autoApply: a.on } };
+    case 'link-card':
+      return log({ ...s, card: { bank: a.bank, last4: a.last4, autoApply: true } }, { kind: 'card', title: `Linked ${a.bank}, ending ${a.last4}`, detail: 'Kept: bank name and last four digits.' });
+    case 'unlink-card':
+      return log({ ...s, card: null }, { kind: 'card', title: 'Card removed', detail: 'Nothing about the card is kept.' });
     case 'dismiss':
-      return { ...s, nudges: s.nudges.filter((n) => n.id !== a.id) };
-    case 'perk':
-      return { ...s, perk: { date: today() } };
+      return { ...s, toasts: s.toasts.filter((t) => t.id !== a.id) };
     case 'reset':
-      return { ...initialState(), account: s.account };
+      return { ...initialState(), user: s.user };
     default:
       return s;
   }
 }
 
-const StoreContext = createContext(null);
+const Ctx = createContext(null);
 
 export function StoreProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, undefined, load);
 
   useEffect(() => {
     try {
-      const { nudges, ...persist } = state;
-      localStorage.setItem(KEY, JSON.stringify(persist));
-    } catch { /* storage unavailable: demo still works for this visit */ }
+      const { toasts, ...keep } = state;
+      localStorage.setItem(KEY, JSON.stringify(keep));
+    } catch { /* storage unavailable */ }
   }, [state]);
 
   const derived = useMemo(() => {
-    const balance = balanceOf(state.lots);
-    const expiringLots = state.lots.filter((l) => l.expiresInDays != null && l.expiresInDays <= EXPIRY_HORIZON);
-    const soonest = expiringLots.sort((a, b) => a.expiresInDays - b.expiresInDays)[0] || null;
-    const person = PEOPLE.find((p) => p.id === state.personId);
-    const earned = {
-      first: state.activity.some((e) => (e.kind === 'redeem' || e.kind === 'payment') && !e.undone && e.points < 0),
-      saver: state.saved > 0,
-      quiet: state.heldByQuiet,
-      linked: state.cards.length > 0,
-      week: state.settings.challenge,
-    };
-    return { balance, soonest, person, earned, name: state.account?.name || person.name };
-  }, [state]);
+    const tier = tierFor(state.points);
+    const next = nextTier(state.points);
+    const unlocked = REWARDS.filter((r) => tierRank(r.tier) <= tierRank(tier.id));
+    const available = unlocked.filter((r) => !state.used[r.id]);
+    const locked = REWARDS.filter((r) => tierRank(r.tier) > tierRank(tier.id));
+    const d = new Date();
+    const ranked = rankRewards(available, { starred: new Set(state.starred), hour: d.getHours() + d.getMinutes() / 60, model });
+    const progress = next ? (state.points - tier.min) / (next.min - tier.min) : 1;
+    return { tier, next, unlocked, available, locked, ranked, progress, tiers: TIERS };
+  }, [state.points, state.used, state.starred]);
 
   const act = useCallback((type, payload = {}) => dispatch({ type, ...payload }), []);
-  const value = useMemo(() => ({ state, ...derived, act }), [state, derived, act]);
-  return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
+  const pay = useCallback((merchantId, amount) => dispatch({ type: 'pay', merchantId, amount, available: derived.available }), [derived.available]);
+  const value = useMemo(() => ({ state, ...derived, act, pay }), [state, derived, act, pay]);
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
-export const useStore = () => useContext(StoreContext);
+export const useStore = () => useContext(Ctx);

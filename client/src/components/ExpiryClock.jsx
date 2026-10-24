@@ -17,20 +17,20 @@ function arc(cx, cy, r, a0, a1) {
  * days left before the points expire. Yellow appears nowhere else.
  */
 const ExpiryClock = forwardRef(function ExpiryClock(
-  { daysLeft, points, size = 240, tone = 'field', showLabel = true, className = '' },
+  { daysLeft, points, size = 240, tone = 'field', showLabel = true, className = '', ariaLabel },
   ref,
 ) {
   const d = Math.max(0, Math.min(DAYS, daysLeft));
   const whole = Math.ceil(d - 1e-6);
   const seg = 360 / DAYS;
   const r = 100;
-  const track = tone === 'field' ? 'var(--field-2)' : 'var(--paper-2)';
+  const track = tone === 'field' ? 'rgba(255,255,255,0.16)' : 'var(--mist-2)';
   const days = Math.round(d);
   const label = `${points != null ? `${points.toLocaleString()} points expire` : 'Points expire'} in ${days} ${days === 1 ? 'day' : 'days'}`;
 
   return (
     <figure ref={ref} className={`clock clock-${tone} ${className}`} style={{ width: size, maxWidth: '100%' }}>
-      <svg viewBox="0 0 240 240" role="img" aria-label={label}>
+      <svg viewBox="0 0 240 240" role="img" aria-label={ariaLabel || label}>
         {Array.from({ length: DAYS }, (_, i) => {
           const a0 = i * seg + GAP / 2;
           const a1 = (i + 1) * seg - GAP / 2;
@@ -39,7 +39,7 @@ const ExpiryClock = forwardRef(function ExpiryClock(
             <g key={i}>
               <path d={arc(120, 120, r, a0, a1)} stroke={track} strokeWidth="22" fill="none" />
               {fill > 0 && (
-                <path d={arc(120, 120, r, a0, a0 + (a1 - a0) * fill)} stroke="var(--yellow)" strokeWidth="22" fill="none" />
+                <path d={arc(120, 120, r, a0, a0 + (a1 - a0) * fill)} stroke="var(--brass)" strokeWidth="22" fill="none" />
               )}
             </g>
           );

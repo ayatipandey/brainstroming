@@ -1,38 +1,32 @@
 # Design
 
-The product is the exhibit. A plain white page frames a working wallet the way a gallery frames one object. Editorial, left aligned, generous space; motion is used once per idea.
+Claret and brass on white. Editorial and quiet; the app is the hero, framed in a tilted phone.
 
 ## Color
 
 | Token | Value | Use |
 |---|---|---|
-| `--white` | #ffffff | Page ground |
-| `--paper` | #f5f4f1 | Warm grey fields, panels |
-| `--paper-2` | #ecebe6 | Clock track on light, quiet fills |
-| `--rule` | #dcd9d2 | Hairlines |
-| `--ink` / `--field` | #012834 | Text, and the only dark field (stakes, wallet hero, footer) |
-| `--ink-2` | #4f5752 | Secondary text, 7.6:1 on white |
-| `--green` | #4bcd3e | Actions only; text on it is `--field` (7.6:1) |
-| `--teal` | #015b7e | Links, default app accent |
-| `--blue` | #285bc5 | Focus ring, alternate accent, model series |
-| `--yellow` | #ffc845 | The expiry clock only |
+| `--ground` | #ffffff | Page |
+| `--mist` / `--mist-2` | #f5f1f2 / #ebe4e6 | Soft fields, tracks |
+| `--line` | #e2d9dc | Hairlines |
+| `--ink` | #22161b | Text, 17.5:1 |
+| `--ink-2` | #675a60 | Secondary text, 6.5:1 |
+| `--claret` | #5b1531 | Primary actions, top pick, fields, footer |
+| `--link` | #8a1f45 | Links and store names, 8.9:1 |
+| `--brass` | #b8935a | Expiry ring and Gold tier; never text on white |
+| `--brass-hi` | #e3c995 | Accent text on claret, 8.2:1 |
+| Tier materials | #ebe4e6, #c9c7cb, #b8935a, #2a2d33 | Member, Silver, Gold, Platinum |
 
-High contrast mode swaps ink and fields to pure black and drops warm greys to white.
+Chart: model #a3245a solid, rules #3f6db8 dashed (validated for color vision deficiency).
 
 ## Type
 
-Atkinson Hyperlegible, 400 and 700, self-hosted. Display at 700 with -0.035em to -0.045em tracking and 0.92 to 0.98 line height; body 17px at 1.55. Headlines stay at two lines or fewer at every width and text size. Display steps (`--step-3` to `--step-5`) do not scale with the reader's text size; reading steps do.
+Atkinson Hyperlegible Next (variable), 400 body and 700 to 780 display, tracking -0.04em to -0.06em. Display steps do not grow with the reader's text size, so headlines stay at two lines.
 
-## Shape and depth
+## Shape
 
-Pill buttons, 20px UI fragments, 28 to 36px composition panels, 46px phone. No resting shadows, gradients or glass. Depth comes from overlap and parallax.
-
-## Signature parts
-
-- The 14-day expiry clock: one segment per day, yellow for days left.
-- The phone frame with real UI inside, inert and described as one image.
-- Reasons lists with score deltas, and a meter with the 70% bar marked.
+Pills for actions and filters, 22 to 30px radii for cards, 48px phone. No resting shadows, gradients or glass.
 
 ## Motion
 
-GSAP + ScrollTrigger with Lenis. One load sequence in the hero (headline words rise from masks, phone arrives, nudge lands), parallax on the phone and fragments, the stakes clock draining from 14 to 0 on scroll, a sticky engine stage that changes scene with a WebGL noise dissolve, clip-path reveals on feature compositions, and a guilloche line pattern on offer tiles that bends toward the pointer. All of it is skipped under reduced motion; content is visible without scripts running the motion.
+GSAP ScrollTrigger with Lenis. CSS 3D only: the hero phone swings in and squares up as you scroll, a pile of reward cards stands up and sorts into the ranked list, a reward card turns over to its QR, the tier cards fan out of a stack, and points climb until Gold unlocks. All of it is off under reduced motion.

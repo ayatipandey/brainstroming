@@ -9,8 +9,8 @@ const W = 520;
 const H = 400;
 const PAD = { l: 56, r: 20, t: 16, b: 52 };
 const SERIES = [
-  { key: 'model', label: 'Trained model', color: '#285bc5', dash: null },
-  { key: 'rules', label: 'Rules baseline', color: '#b06a12', dash: '7 6' },
+  { key: 'model', label: 'Trained model', color: '#a3245a', dash: null },
+  { key: 'rules', label: 'Rules baseline', color: '#3f6db8', dash: '7 6' },
 ];
 
 const x = (v) => PAD.l + v * (W - PAD.l - PAD.r);
