@@ -20,6 +20,17 @@ export function SessionProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const [arrival, setArrival] = useState(null); // a reward a card payment just applied
   const seen = useRef(readSeen());
+  const meRef = useRef(null);
+  meRef.current = me;
+
+  // Browser notification for an applied reward, only with the person's consent.
+  const notify = (title, body) => {
+    try {
+      if (meRef.current?.consents?.notifications?.granted && 'Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, { body, icon: '/brand/icon-192.png' });
+      }
+    } catch { /* notifications unavailable */ }
+  };
 
   const refreshMe = useCallback(async () => {
     try {
@@ -48,7 +59,7 @@ export function SessionProvider({ children }) {
         title: `${fresh.length} payments received`,
         body: `You earned ${pts.toLocaleString()} points${applied.length ? ` and ${applied.length} reward${applied.length > 1 ? 's were' : ' was'} applied` : ''}. See Activity for details.`,
       }, ...ts].slice(0, 3));
-      if (applied.length) setArrival(applied[applied.length - 1]);
+      if (applied.length) { setArrival(applied[applied.length - 1]); notify(`${applied.length} reward${applied.length > 1 ? 's' : ''} applied`, 'Open the app to see what you saved.'); }
     } else if (seen.current !== 0 && fresh.length) {
       for (const t of fresh) {
         setToasts((ts) => [{
@@ -58,7 +69,7 @@ export function SessionProvider({ children }) {
             ? `${t.offerTitle} at ${t.merchant}. You saved $${t.discount.toFixed(2)} and earned ${t.pointsEarned} points.`
             : `$${t.amount.toFixed(2)} at ${t.merchant}. You earned ${t.pointsEarned} points.`,
         }, ...ts].slice(0, 3));
-        if (t.offerId) setArrival(t);
+        if (t.offerId) { setArrival(t); notify('Reward applied', `${t.offerTitle} at ${t.merchant}. You saved $${t.discount.toFixed(2)}.`); }
       }
     }
     seen.current = a.transactions.length ? Math.max(seen.current, ...a.transactions.map((t) => t.id)) : -1;
