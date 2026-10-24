@@ -1,3 +1,4 @@
+import { BRAND } from '@shared/brand.config.js';
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { TIERS, REWARDS, rewardById, merchantById, termsFor } from '@shared/catalog.js';
@@ -17,7 +18,7 @@ const HOW = {
 
 export default function Tiers() {
   const root = useRef(null);
-  const h1 = usePage('Tiers and terms, Perk Predict');
+  const h1 = usePage(`Tiers and terms, ${BRAND.name}`);
 
   usePageMotion(root, (g) => {
     riseHeadings(g);

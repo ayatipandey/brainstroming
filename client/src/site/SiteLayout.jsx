@@ -1,3 +1,4 @@
+import { BRAND } from '@shared/brand.config.js';
 import { useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import Logo from '../components/Logo.jsx';
@@ -31,7 +32,7 @@ export default function SiteLayout() {
       <a className="skip-link" href="#main">Skip to content</a>
       <header className="nav">
         <div className="nav-inner">
-          <Link to="/" className="nav-logo" aria-label="Perk Predict, home"><Logo /></Link>
+          <Link to="/" className="nav-logo" aria-label={`${BRAND.name}, home`}><Logo /></Link>
           <nav aria-label="Site" className="nav-links">
             <ul role="list">
               {PAGES.map((p) => <li key={p.to}><NavLink to={p.to}>{p.label}</NavLink></li>)}
@@ -49,7 +50,7 @@ export default function SiteLayout() {
         <Outlet />
       </main>
       <footer className="footer on-claret">
-        <p className="footer-name" aria-hidden="true">Perk Predict</p>
+        <p className="footer-name" aria-hidden="true">{BRAND.name}</p>
         <div className="footer-meta">
           <p className="footer-lead">A predictive loyalty prototype, built for the FIS Innovation Challenge.</p>
           <p>Every person, store, bank, balance and reward is demo data. No real payments are made and no card numbers are used.</p>

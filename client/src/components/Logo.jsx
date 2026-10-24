@@ -1,3 +1,4 @@
+import { BRAND } from '@shared/brand.config.js';
 export function Mark({ size = 28 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" focusable="false" className="mark">
@@ -11,7 +12,7 @@ export default function Logo({ size = 28 }) {
   return (
     <span className="logo">
       <Mark size={size} />
-      <span className="logo-word">Perk Predict</span>
+      <span className="logo-word">{BRAND.name}</span>
     </span>
   );
 }

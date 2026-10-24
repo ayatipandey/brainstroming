@@ -1,3 +1,4 @@
+import { BRAND } from '@shared/brand.config.js';
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { rewardById, REWARDS } from '@shared/catalog.js';
@@ -18,7 +19,7 @@ const goldRewards = REWARDS.filter((r) => r.tier === 'gold');
 
 export default function How() {
   const root = useRef(null);
-  const h1 = usePage('How it works, Perk Predict');
+  const h1 = usePage(`How it works, ${BRAND.name}`);
 
   const reduced = usePageMotion(root, (g) => {
     riseHeadings(g);

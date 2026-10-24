@@ -1,4 +1,5 @@
 import express from 'express';
+import { BRAND } from '../shared/brand.config.js';
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -49,4 +50,4 @@ if (existsSync(dist)) {
   app.get(/^(?!\/api).*/, (_req, res) => res.sendFile(path.join(dist, 'index.html')));
 }
 
-app.listen(PORT, () => console.log(`Perk Predict API on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`${BRAND.name} API on http://localhost:${PORT}`));

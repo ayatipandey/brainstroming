@@ -1,3 +1,4 @@
+import { BRAND } from '@shared/brand.config.js';
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { merchantById, CATEGORIES, categoryOf } from '@shared/catalog.js';
@@ -18,7 +19,7 @@ const STAKES = [
 
 export default function Home() {
   const root = useRef(null);
-  const h1 = usePage('Perk Predict: rewards that find you');
+  const h1 = usePage(`${BRAND.name}: rewards that find you`);
   const ranked = demoRanking();
 
   usePageMotion(root, (g) => {
@@ -72,7 +73,7 @@ export default function Home() {
         </div>
         <div className="hero-stage">
           <div className="hero-rig">
-            <Phone className="hero-phone" label="The Perk Predict app: Silver tier with 1,120 points, the top reward is any coffee on us at Campus Coffee, ending in 3 days, followed by more rewards.">
+            <Phone className="hero-phone" label={`The ${BRAND.name} app: Silver tier with 1,120 points, the top reward is any coffee on us at Campus Coffee, ending in 3 days, followed by more rewards.`}>
               <AppPreview rows={3} />
             </Phone>
             <div className="float float-toast" aria-hidden="true">

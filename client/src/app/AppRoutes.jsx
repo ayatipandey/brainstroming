@@ -1,3 +1,4 @@
+import { BRAND } from '@shared/brand.config.js';
 import { useEffect, useRef, useState } from 'react';
 import { Routes, Route, NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { StoreProvider, useStore } from './store.jsx';
@@ -20,7 +21,7 @@ export function Screen({ title, children, back, className = '', hideTitle = fals
   const h = useRef(null);
   const { pathname } = useLocation();
   useEffect(() => { h.current?.focus({ preventScroll: true }); window.scrollTo(0, 0); }, [pathname]);
-  useEffect(() => { document.title = `${title}, Perk Predict`; }, [title]);
+  useEffect(() => { document.title = `${title}, ${BRAND.name}`; }, [title]);
   return (
     <div className={`screen ${className}`}>
       {back && <Link to={back.to} className="back"><Icon name="back" /> {back.label}</Link>}
@@ -61,7 +62,7 @@ function SignIn() {
   const h = useRef(null);
   const input = useRef(null);
   const navigate = useNavigate();
-  useEffect(() => { document.title = 'Sign in, Perk Predict'; h.current?.focus(); }, []);
+  useEffect(() => { document.title = `Sign in, ${BRAND.name}`; h.current?.focus(); }, []);
   const submit = (e) => {
     e.preventDefault();
     if (!name.trim()) { setError('Enter your first name to continue.'); input.current?.focus(); return; }
@@ -71,7 +72,7 @@ function SignIn() {
   return (
     <div className="signin">
       <div className="signin-side on-claret">
-        <Link to="/" className="signin-logo" aria-label="Perk Predict, home"><Logo /></Link>
+        <Link to="/" className="signin-logo" aria-label={`${BRAND.name}, home`}><Logo /></Link>
         <p className="signin-big" aria-hidden="true">Your best reward, on top.</p>
       </div>
       <main className="signin-main" id="app-main">
@@ -99,7 +100,7 @@ function Shell() {
     <div className="app">
       <a className="skip-link" href="#app-main">Skip to content</a>
       <header className="app-top">
-        <Link to="/" className="app-logo" aria-label="Perk Predict, back to the website"><Logo size={24} /></Link>
+        <Link to="/" className="app-logo" aria-label={`${BRAND.name}, back to the website`}><Logo size={24} /></Link>
         <nav className="app-nav" aria-label="App">
           <ul role="list">
             {TABS.map((t) => (

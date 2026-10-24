@@ -1,3 +1,4 @@
+import { BRAND } from '@shared/brand.config.js';
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Split from '../components/Split.jsx';
@@ -9,7 +10,7 @@ import { usePage } from '../lib/page.js';
 const FAQ = [
   { q: 'Which reward goes on top?', a: 'The one you are most likely to use right now. Each reward is scored from the time of day, the rewards and stores you star, and how soon it ends. The reasons are written on the top card.' },
   { q: 'How does a reward apply itself?', a: 'Link a card and keep auto-apply on. When you pay with that card at a store where you have a reward, the best one for that purchase is used, your list and points update, and you get a confirmation. You can turn auto-apply off in Account and show the code instead.' },
-  { q: 'Do you store my card number?', a: 'No. Perk Predict keeps the bank name and the last four digits, nothing else. It never sees a card number or a password. In this prototype the card link and payments are simulated.' },
+  { q: 'Do you store my card number?', a: `No. ${BRAND.name} keeps the bank name and the last four digits, nothing else. It never sees a card number or a password. In this prototype the card link and payments are simulated.` },
   { q: 'How do I unlock better rewards?', a: 'Use rewards and pay with your linked card. Using a reward earns bonus points and every dollar you pay earns 10 points. Silver starts at 600 points, Gold at 1,250, and Platinum at 2,500.' },
   { q: 'Where are the terms?', a: 'On every reward, under “Terms, in plain words”: what you get, where, valid until, how many times, minimum spend, points you earn, what happens with a linked card, and anything else that applies.' },
   { q: 'Is this real data?', a: 'No. Every person, store, bank, balance and reward is demo data, and the ranking model was trained on synthetic data. It has not been tested with real customers, and we make no claims about real results.' },
@@ -18,7 +19,7 @@ const FAQ = [
 
 export default function Faq() {
   const root = useRef(null);
-  const h1 = usePage('Questions, Perk Predict');
+  const h1 = usePage(`Questions, ${BRAND.name}`);
   const { prefs, set, reduced } = usePrefs();
 
   usePageMotion(root, (g) => {
