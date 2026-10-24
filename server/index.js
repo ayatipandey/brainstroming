@@ -145,8 +145,9 @@ app.get('/api/offers', requireUser, (req, res) => {
   const hour = Math.min(23.99, Math.max(0, Number(req.query.hour) || new Date().getHours()));
   const s = summary(req.user.id);
   const used = new Set(s.used);
-  const stars = new Set(s.stars);
   const all = visibleOffers();
+  const favBrands = new Set(s.brands);
+  const stars = new Set([...s.stars, ...all.filter((o) => favBrands.has(o.merchantId)).map((o) => o.id)]);
   const unlockedNow = (o) => tierRank(o.tier) <= tierRank(s.tier);
   const available = all.filter((o) => unlockedNow(o) && !used.has(o.id));
   const ranked = rankRewards(available, { starred: stars, hour, model });
@@ -162,6 +163,18 @@ app.post('/api/stars/:offerId', requireUser, (req, res) => {
   if (!offer) return res.status(404).json({ error: 'No such reward.' });
   if (req.body.on) db.prepare('INSERT OR IGNORE INTO stars (user_id, offer_id) VALUES (?, ?)').run(req.user.id, offer.id);
   else db.prepare('DELETE FROM stars WHERE user_id = ? AND offer_id = ?').run(req.user.id, offer.id);
+  res.json({ ok: true });
+});
+
+app.get('/api/brands', requireUser, (req, res) => {
+  const fav = new Set(summary(req.user.id).brands);
+  res.json(MERCHANTS.map((m) => ({ ...m, favorite: fav.has(m.id) })));
+});
+
+app.post('/api/brands/:id', requireUser, (req, res) => {
+  if (!merchantById(req.params.id)) return res.status(404).json({ error: 'No such brand.' });
+  if (req.body.on) db.prepare('INSERT OR IGNORE INTO favorite_brands (user_id, merchant_id) VALUES (?, ?)').run(req.user.id, req.params.id);
+  else db.prepare('DELETE FROM favorite_brands WHERE user_id = ? AND merchant_id = ?').run(req.user.id, req.params.id);
   res.json({ ok: true });
 });
 
@@ -224,6 +237,7 @@ app.get('/api/me/export', requireUser, (req, res) => {
     transactions: pick('SELECT merchant_id, amount_cents, discount_cents, offer_id, points_earned, points_spent, occurred_at FROM transactions WHERE user_id = ?'),
     points: pick('SELECT amount, remaining, earned_at, expires_at FROM point_lots WHERE user_id = ?'),
     stars: pick('SELECT offer_id FROM stars WHERE user_id = ?'),
+    favoriteBrands: pick('SELECT merchant_id FROM favorite_brands WHERE user_id = ?'),
     events: pick('SELECT kind, title, detail, at FROM events WHERE user_id = ?'),
   });
 });

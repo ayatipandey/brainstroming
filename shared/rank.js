@@ -22,7 +22,7 @@ export function rankRewards(rewards, { starred, hour, model }) {
       }, model);
       const why = [];
       if (r.days <= 3) why.push(`Ends in ${r.days} ${r.days === 1 ? 'day' : 'days'}`);
-      if (starred.has(r.id)) why.push('You starred it');
+      if (starred.has(r.id)) why.push('One of your favorites');
       else if (favorite) why.push(`You star ${CATEGORIES[category].label.toLowerCase()} rewards`);
       if (reasons.some((x) => x.effect === 'up' && x.text.includes('inside'))) why.push(`${CATEGORIES[category].label} time`);
       return { reward: r, score, why };

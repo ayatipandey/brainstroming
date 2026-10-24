@@ -74,6 +74,11 @@ CREATE TABLE IF NOT EXISTS cards (
   auto_apply INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+CREATE TABLE IF NOT EXISTS favorite_brands (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  merchant_id TEXT NOT NULL REFERENCES merchants(id),
+  PRIMARY KEY (user_id, merchant_id)
+);
 CREATE TABLE IF NOT EXISTS stars (
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   offer_id TEXT NOT NULL REFERENCES offers(id),

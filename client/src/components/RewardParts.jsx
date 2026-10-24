@@ -4,16 +4,20 @@ import QRCode from 'qrcode';
 import { merchantById, categoryOf, validUntil, money, TIERS } from '@shared/catalog.js';
 import Icon, { categoryIcon } from './Icon.jsx';
 import ExpiryClock from './ExpiryClock.jsx';
-import '../styles/app.css';
+import BrandMark from './BrandMark.jsx';
 
 // Parts shared by the app and the site's phone. On the site they render
 // with demo data inside an inert phone frame.
 
+const dateOf = (r) => (r.validUntil
+  ? new Date(`${r.validUntil}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
+  : validUntil(r.days));
+
 export function keyTerms(r) {
-  const parts = [`Ends ${validUntil(r.days)}`];
+  const parts = [`Ends ${dateOf(r)}`];
   parts.push(r.minSpend ? `minimum spend ${money(r.minSpend)}` : 'no minimum spend');
   parts.push('once');
-  return `${parts.join(', ')}.`;
+  return `${r.cost != null ? `${r.cost.toLocaleString()} points. ` : ''}${parts.join(', ')}.`;
 }
 
 export function StarButton({ reward, starred, onStar, size = 24 }) {
@@ -36,11 +40,12 @@ export function RewardRow({ reward, starred, onStar, to, locked = false, used = 
   const tierName = TIERS.find((t) => t.id === reward.tier).name;
   const body = (
     <>
-      <span className={`rr-icon rr-${cat}`}><Icon name={locked ? 'lock' : categoryIcon[cat]} /></span>
+      <span className="rr-icon">{locked ? <Icon name="lock" /> : <BrandMark merchantId={reward.merchantId} size={52} />}</span>
       <span className="rr-main">
         <span className="rr-title">{reward.title}</span>
         <span className="rr-merchant">{m.name}</span>
         <span className="rr-terms">{locked ? `Unlocks at ${tierName}.` : used ? 'Used.' : keyTerms(reward)}</span>
+        {!locked && !used && reward.affordable === false && <span className="rr-need">You need more points for this one.</span>}
       </span>
     </>
   );
@@ -66,7 +71,7 @@ export function TopPick({ item, starred, onStar, to }) {
           <h3 id={`top-${r.id}`} className="top-title">{r.title}</h3>
           {item.why.length > 0 && <p className="top-why">{item.why.join('. ')}.</p>}
         </div>
-        <ExpiryClock daysLeft={Math.min(r.days, 14)} size={128} ariaLabel={`Ends in ${r.days} days`} />
+        <ExpiryClock daysLeft={Math.min(r.days, 14)} size={128} ariaLabel={`Ends in ${r.days} days`} tone="field" />
       </div>
       <p className="top-terms">{keyTerms(r)}</p>
       {to ? <Link to={to} className="btn btn-primary"><Icon name="qr" /> Show code</Link> : <span className="btn btn-primary"><Icon name="qr" /> Show code</span>}

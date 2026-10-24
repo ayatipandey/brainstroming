@@ -1,110 +1,88 @@
 import { useMemo, useState } from 'react';
-import { CATEGORIES, CATEGORY_IDS, merchantById, categoryOf, TIERS, tierRank } from '@shared/catalog.js';
+import { useSearchParams } from 'react-router-dom';
+import { CATEGORIES, CATEGORY_IDS, merchantById, categoryOf, TIERS } from '@shared/catalog.js';
 import { Screen } from '../AppRoutes.jsx';
-import { useStore } from '../store.jsx';
-import { RewardRow, TopPick, TierBar } from '../../components/RewardParts.jsx';
+import { useSession } from '../session.jsx';
+import { api } from '../api.js';
+import { RewardRow } from '../../components/RewardParts.jsx';
 import Icon from '../../components/Icon.jsx';
 
 const FILTERS = [
   { id: 'all', label: 'All' },
-  { id: 'starred', label: 'Starred' },
+  { id: 'starred', label: 'Favorites' },
   ...CATEGORY_IDS.map((c) => ({ id: c, label: CATEGORIES[c].label })),
 ];
 
 export default function Rewards() {
-  const { state, act, ranked, locked, tier, next, progress, unlocked } = useStore();
-  const [query, setQuery] = useState('');
+  const { me, offers, refreshOffers, refreshMe, toast } = useSession();
+  const [params, setParams] = useSearchParams();
+  const [query, setQuery] = useState(params.get('q') || '');
   const [filter, setFilter] = useState('all');
-  const starred = new Set(state.starred);
-  const onStar = (id) => act('star', { id });
+  const stars = new Set(me.summary.stars);
+
+  const onStar = async (id) => {
+    try {
+      await api(`/stars/${id}`, { method: 'POST', body: { on: !stars.has(id) } });
+      await Promise.all([refreshMe(), refreshOffers()]);
+    } catch (e) {
+      toast('Could not update favorites', e.message);
+    }
+  };
 
   const q = query.trim().toLowerCase();
   const filtering = q !== '' || filter !== 'all';
-  const matches = useMemo(() => ranked.filter(({ reward: r }) => {
-    if (filter === 'starred' && !starred.has(r.id)) return false;
+  const ranked = offers?.ranked || [];
+  const matches = useMemo(() => ranked.filter((r) => {
+    if (filter === 'starred' && !stars.has(r.id)) return false;
     if (CATEGORIES[filter] && categoryOf(r) !== filter) return false;
     if (!q) return true;
-    const m = merchantById(r.merchantId);
-    return `${r.title} ${m.name} ${CATEGORIES[categoryOf(r)].label}`.toLowerCase().includes(q);
-  }), [ranked, filter, q, state.starred]); // eslint-disable-line react-hooks/exhaustive-deps
+    return `${r.title} ${merchantById(r.merchantId).name} ${CATEGORIES[categoryOf(r)].label}`.toLowerCase().includes(q);
+  }), [ranked, filter, q, me.summary.stars]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const top = !filtering ? ranked[0] : null;
-  const list = top ? matches.slice(1) : matches;
-  const usedList = unlocked.filter((r) => state.used[r.id]);
-  const nextLocked = next ? locked.filter((r) => r.tier === next.id) : [];
-  const laterLocked = locked.filter((r) => !next || r.tier !== next.id);
+  if (!offers) return <Screen title="Rewards"><p role="status">Loading rewards</p></Screen>;
 
   return (
-    <Screen title={`Hi, ${state.user.name}`} className="rewards">
-      <TierBar points={state.points} tier={tier} next={next} progress={progress} />
-
-      {top && (
-        <section className="block" aria-labelledby="best-h">
-          <h2 id="best-h" className="block-title">Best for right now</h2>
-          <TopPick item={top} starred={starred.has(top.reward.id)} onStar={onStar} to={`/app/reward/${top.reward.id}`} />
-        </section>
-      )}
-
-      <section className="block" aria-labelledby="all-h">
-        <h2 id="all-h" className="block-title">{filtering ? 'Matching rewards' : 'All your rewards'}</h2>
-        <p className="block-sub">Most likely to be used first.</p>
-        <div className="search">
-          <label htmlFor="q" className="visually-hidden">Search rewards</label>
-          <Icon name="search" />
-          <input id="q" type="search" className="input search-input" placeholder="Search rewards or stores" value={query} onChange={(e) => setQuery(e.target.value)} />
-        </div>
-        <div className="chips" role="radiogroup" aria-label="Filter by category">
-          {FILTERS.map((f) => (
-            <button key={f.id} type="button" role="radio" aria-checked={filter === f.id} className="chip" onClick={() => setFilter(f.id)}>
-              {f.id === 'starred' && <Icon name="star" size={18} filled={filter === 'starred'} />}{f.label}
-            </button>
+    <Screen title="Rewards" className="rewards">
+      <p className="lead">Most likely to be used first. Rewards apply themselves when you pay with a linked card and have the points.</p>
+      <div className="search-pill glass" role="search">
+        <label htmlFor="q" className="visually-hidden">Find a reward</label>
+        <Icon name="search" />
+        <input id="q" type="search" placeholder="Find a reward or store" value={query}
+          onChange={(e) => { setQuery(e.target.value); setParams(e.target.value ? { q: e.target.value } : {}, { replace: true }); }} />
+      </div>
+      <div className="chips" role="radiogroup" aria-label="Filter rewards">
+        {FILTERS.map((f) => (
+          <button key={f.id} type="button" role="radio" aria-checked={filter === f.id} className="chip" onClick={() => setFilter(f.id)}>
+            {f.id === 'starred' && <Icon name="star" size={18} filled={filter === 'starred'} />}{f.label}
+          </button>
+        ))}
+      </div>
+      <p className="count" aria-live="polite">{matches.length} {matches.length === 1 ? 'reward' : 'rewards'}{filtering ? ' match' : ' available'}</p>
+      {matches.length ? (
+        <ul className="rr-list glass-list" role="list">
+          {matches.map((r, i) => (
+            <RewardRow key={r.id} reward={r} starred={stars.has(r.id)} onStar={onStar} to={`/app/reward/${r.id}`} top={i === 0 && !filtering} />
           ))}
+        </ul>
+      ) : (
+        <div className="empty glass">
+          <p>{filter === 'starred' && !q ? 'No favorites yet. Tap the star on a reward, or pick favorite brands.' : ranked.length ? `No rewards match “${query || FILTERS.find((f) => f.id === filter).label}”.` : 'There are no rewards available right now.'}</p>
+          {filtering && <button type="button" className="btn btn-quiet btn-small" onClick={() => { setQuery(''); setFilter('all'); setParams({}); }}>Show all rewards</button>}
         </div>
-        <p className="count" aria-live="polite">{matches.length} {matches.length === 1 ? 'reward' : 'rewards'}{filtering ? ' match' : ' ready to use'}</p>
-        {list.length > 0 ? (
-          <ul className="rr-list" role="list">
-            {list.map(({ reward }) => (
-              <RewardRow key={reward.id} reward={reward} starred={starred.has(reward.id)} onStar={onStar} to={`/app/reward/${reward.id}`} />
-            ))}
-          </ul>
-        ) : matches.length === 0 && (
-          <div className="empty">
-            <p>{filter === 'starred' && !q ? 'No starred rewards yet. Tap the star on any reward to keep it here.' : `No rewards match “${query || FILTERS.find((f) => f.id === filter).label}”.`}</p>
-            <button type="button" className="btn btn-quiet btn-small" onClick={() => { setQuery(''); setFilter('all'); }}>Show all rewards</button>
-          </div>
-        )}
-      </section>
-
-      {nextLocked.length > 0 && !filtering && (
-        <section className="block" aria-labelledby="next-h">
-          <h2 id="next-h" className="block-title">Unlock at {next.name}</h2>
-          <p className="block-sub">{(next.min - state.points).toLocaleString()} more points. Use rewards and pay with your linked card to earn them.</p>
-          <ul className="rr-list" role="list">
-            {nextLocked.map((r) => <RewardRow key={r.id} reward={r} locked />)}
+      )}
+      {!filtering && offers.locked.length > 0 && (
+        <section className="block" aria-labelledby="locked-h">
+          <h2 id="locked-h" className="block-title">Unlock with more points</h2>
+          <p className="block-sub">Tiers unlock with all the points you have earned.</p>
+          <ul className="rr-list glass-list" role="list">
+            {offers.locked.map((r) => <RewardRow key={r.id} reward={r} locked tierName={TIERS.find((t) => t.id === r.tier).name} />)}
           </ul>
         </section>
       )}
-
-      {!filtering && laterLocked.length > 0 && (
+      {!filtering && offers.used.length > 0 && (
         <details className="more">
-          <summary>Rewards at higher tiers ({laterLocked.length})</summary>
-          {TIERS.filter((t) => tierRank(t.id) > tierRank(next?.id || tier.id)).map((t) => (
-            <div key={t.id}>
-              <h3 className="more-tier">{t.name}, from {t.min.toLocaleString()} points</h3>
-              <ul className="rr-list" role="list">
-                {laterLocked.filter((r) => r.tier === t.id).map((r) => <RewardRow key={r.id} reward={r} locked />)}
-              </ul>
-            </div>
-          ))}
-        </details>
-      )}
-
-      {usedList.length > 0 && !filtering && (
-        <details className="more">
-          <summary>Used rewards ({usedList.length})</summary>
-          <ul className="rr-list" role="list">
-            {usedList.map((r) => <RewardRow key={r.id} reward={r} used />)}
-          </ul>
+          <summary>Used rewards ({offers.used.length})</summary>
+          <ul className="rr-list glass-list" role="list">{offers.used.map((r) => <RewardRow key={r.id} reward={r} used />)}</ul>
         </details>
       )}
     </Screen>

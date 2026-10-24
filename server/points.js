@@ -40,13 +40,14 @@ export function summary(userId) {
   const savedPoints = db.prepare('SELECT COALESCE(SUM(saved_from_expiring), 0) AS n FROM transactions WHERE user_id = ?').get(userId).n;
   const used = db.prepare('SELECT offer_id FROM transactions WHERE user_id = ? AND offer_id IS NOT NULL').all(userId).map((r) => r.offer_id);
   const stars = db.prepare('SELECT offer_id FROM stars WHERE user_id = ?').all(userId).map((r) => r.offer_id);
+  const brands = db.prepare('SELECT merchant_id FROM favorite_brands WHERE user_id = ?').all(userId).map((r) => r.merchant_id);
   const tier = tierFor(lifetime);
   return {
     balance, lifetime, earnedYear, usedYear,
     expiring: { points: expiring.n, daysLeft: expiring.soonest ? Math.max(0, Math.ceil((new Date(expiring.soonest) - Date.now()) / DAY)) : null },
     savedFromExpiring: savedPoints,
     tier: tier.id,
-    used, stars,
+    used, stars, brands,
   };
 }
 

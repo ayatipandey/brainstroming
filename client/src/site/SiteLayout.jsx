@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import Logo from '../components/Logo.jsx';
 import Icon from '../components/Icon.jsx';
+import ConfigWarning from '../components/ConfigWarning.jsx';
 import '../styles/site.css';
 
 const PAGES = [
@@ -29,6 +30,8 @@ export default function SiteLayout() {
 
   return (
     <div className="site">
+      <div className="field" aria-hidden="true"><i /><i /><i /><i /></div>
+      <ConfigWarning />
       <a className="skip-link" href="#main">Skip to content</a>
       <header className="nav">
         <div className="nav-inner">
@@ -38,7 +41,10 @@ export default function SiteLayout() {
               {PAGES.map((p) => <li key={p.to}><NavLink to={p.to}>{p.label}</NavLink></li>)}
             </ul>
           </nav>
-          <Link to="/app" className="btn btn-primary btn-small nav-cta">Sign in</Link>
+          <div className="nav-cta">
+            <Link to="/app/sign-in" className="text-link nav-signin">Sign in</Link>
+            <Link to="/app/sign-up" className="btn btn-primary btn-small">Create account</Link>
+          </div>
         </div>
         <nav aria-label="Site, small screens" className="nav-mobile">
           <ul role="list">
@@ -49,15 +55,25 @@ export default function SiteLayout() {
       <main id="main" tabIndex={-1}>
         <Outlet />
       </main>
-      <footer className="footer on-claret">
+      <footer className="footer on-sheet">
         <p className="footer-name" aria-hidden="true">{BRAND.name}</p>
         <div className="footer-meta">
-          <p className="footer-lead">A predictive loyalty prototype, built for the FIS Innovation Challenge.</p>
-          <p>Every person, store, bank, balance and reward is demo data. No real payments are made and no card numbers are used.</p>
+          <div>
+            <p className="footer-lead">{BRAND.name}. {BRAND.tagline}.</p>
+            <p>{BRAND.legalEntity || '[missing: legal entity]'}<br />{BRAND.address || '[missing: address]'}<br />{BRAND.registration || '[missing: registration]'}</p>
+            <p>{BRAND.contactEmail ? <a href={`mailto:${BRAND.contactEmail}`}>{BRAND.contactEmail}</a> : '[missing: contact email]'}</p>
+          </div>
+          <div>
+            <p>Built for the FIS Innovation Challenge. Store names and offers shown during the pilot are placeholders until each merchant confirms them. No brand has endorsed this app.</p>
+          </div>
           <ul role="list" className="footer-links">
             <li><Link to="/">Home</Link></li>
             {PAGES.map((p) => <li key={p.to}><Link to={p.to}>{p.label}</Link></li>)}
-            <li><Link to="/app">Sign in</Link></li>
+            <li><Link to="/legal/privacy">Privacy policy</Link></li>
+            <li><Link to="/legal/terms">Terms and conditions</Link></li>
+            <li><Link to="/legal/cookies">Cookies policy</Link></li>
+            <li><Link to="/legal/refunds">Refund policy</Link></li>
+            <li><Link to="/credits">Credits</Link></li>
           </ul>
         </div>
       </footer>

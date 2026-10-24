@@ -24,7 +24,7 @@ const ExpiryClock = forwardRef(function ExpiryClock(
   const whole = Math.ceil(d - 1e-6);
   const seg = 360 / DAYS;
   const r = 100;
-  const track = tone === 'field' ? 'rgba(255,255,255,0.16)' : 'var(--mist-2)';
+  const track = tone === 'field' ? 'rgba(255,255,255,0.16)' : 'rgba(1,40,52,0.1)';
   const days = Math.round(d);
   const label = `${points != null ? `${points.toLocaleString()} points expire` : 'Points expire'} in ${days} ${days === 1 ? 'day' : 'days'}`;
 
@@ -39,7 +39,7 @@ const ExpiryClock = forwardRef(function ExpiryClock(
             <g key={i}>
               <path d={arc(120, 120, r, a0, a1)} stroke={track} strokeWidth="22" fill="none" />
               {fill > 0 && (
-                <path d={arc(120, 120, r, a0, a0 + (a1 - a0) * fill)} stroke="var(--brass)" strokeWidth="22" fill="none" />
+                <path d={arc(120, 120, r, a0, a0 + (a1 - a0) * fill)} stroke={tone === 'field' ? 'var(--green)' : 'var(--green-text)'} strokeWidth="22" fill="none" />
               )}
             </g>
           );
