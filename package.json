@@ -1,0 +1,17 @@
+{
+  "name": "perk-predict",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Perk Predict: a predictive loyalty prototype for the FIS Innovation Challenge",
+  "type": "module",
+  "scripts": {
+    "install:all": "npm install && npm install --prefix client && npm install --prefix server",
+    "dev": "concurrently -n api,web -c cyan,green \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "build": "npm run build --prefix client",
+    "start": "npm run start --prefix server",
+    "train": "python3 model/generate_data.py && python3 model/train.py"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

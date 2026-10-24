@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.impeccable/review/
+.impeccable/config.local.json
+model/data/
+__pycache__/
