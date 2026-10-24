@@ -1,32 +1,34 @@
 # Design
 
-Claret and brass on white. Editorial and quiet; the app is the hero, framed in a tilted phone.
+Frosted glass over a warm, softly blurred colour field, with bold tight type and one dark sheet for the next action. Palette derived from FIS.
 
-## Color
+## Colour
 
 | Token | Value | Use |
 |---|---|---|
-| `--ground` | #ffffff | Page |
-| `--mist` / `--mist-2` | #f5f1f2 / #ebe4e6 | Soft fields, tracks |
-| `--line` | #e2d9dc | Hairlines |
-| `--ink` | #22161b | Text, 17.5:1 |
-| `--ink-2` | #675a60 | Secondary text, 6.5:1 |
-| `--claret` | #5b1531 | Primary actions, top pick, fields, footer |
-| `--link` | #8a1f45 | Links and store names, 8.9:1 |
-| `--brass` | #b8935a | Expiry ring and Gold tier; never text on white |
-| `--brass-hi` | #e3c995 | Accent text on claret, 8.2:1 |
-| Tier materials | #ebe4e6, #c9c7cb, #b8935a, #2a2d33 | Member, Silver, Gold, Platinum |
+| `--ground` | #f6f1ea | Warm neutral page |
+| Field | apricot #f2a679, soft green #9fe28f, soft cyan #8fd3e2, soft rose #f0b4b8 | Blurred background only, never under text without glass |
+| `--glass` | 72% white + 22px blur | Panels; text on it passes AA over every field colour |
+| `--ink` / `--sheet` | #012834 | Text, the dark bottom sheet, primary dark buttons |
+| `--ink-2` | #33494f | Secondary text, 5.5:1 or better everywhere |
+| `--link` | #014a66 | Links and store names |
+| `--green` | #4bcd3e | The lime moment: primary actions (ink text on it, 7.5:1), accents on the dark sheet |
+| `--green-text` | #145010 | Green on light surfaces |
+| Card tones | lime #d4f5c2, pink #f9d3d6, cyan #c7ecf3, sand #efe4d3 | Activity stack, favorite brands |
 
-Chart: model #a3245a solid, rules #3f6db8 dashed (validated for color vision deficiency).
+High contrast mode removes the field and glass and uses black on white.
 
 ## Type
 
-Atkinson Hyperlegible Next (variable), 400 body and 700 to 780 display, tracking -0.04em to -0.06em. Display steps do not grow with the reader's text size, so headlines stay at two lines.
+Atkinson Hyperlegible Next (variable), 800 for headlines with -0.045 to -0.06em tracking. Display steps do not grow with the reader's text size, so headlines keep to two lines.
 
-## Shape
+## Signature parts
 
-Pills for actions and filters, 22 to 30px radii for cards, 48px phone. No resting shadows, gradients or glass.
+- Logo: a deep-teal disc, an FIS-green arc that stops short, and a warm dot in the gap. No letters.
+- Home: points with their dollar value, a tick-mark bar (points used against earned this year), the 14-day expiry clock, saved-from-expiring, a search pill, pill rows ending in round arrow buttons, and the dark "next best step" sheet with its reasons.
+- Activity: used rewards as a 3D stack with scroll snap, or a plain list.
+- A 3D coin (three.js, lazy) that turns with scroll, pointer and device tilt.
 
 ## Motion
 
-GSAP ScrollTrigger with Lenis. CSS 3D only: the hero phone swings in and squares up as you scroll, a pile of reward cards stands up and sorts into the ranked list, a reward card turns over to its QR, the tier cards fan out of a stack, and points climb until Gold unlocks. All of it is off under reduced motion.
+Lazy and calm: the coin loads after the page settles and renders only while moving; the field drifts slowly; a reward card flies from Home to Activity when a payment applies it. Reduced motion (system or in-app) turns all of it off, and Activity opens as a list.

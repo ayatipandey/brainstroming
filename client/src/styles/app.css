@@ -1,7 +1,8 @@
 /* The app: frosted glass over a warm colour field, bold type, one dark sheet. */
 
 .app { min-height: 100svh; }
-.app-top { position: sticky; top: 0; z-index: 30; height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 16px; background: rgba(246, 241, 234, 0.82); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border-bottom: 1px solid var(--line); }
+/* No backdrop-filter here: it would make the header the containing block for the fixed tab bar inside it. */
+.app-top { position: sticky; top: 0; z-index: 30; height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 16px; background: rgba(246, 241, 234, 0.95); border-bottom: 1px solid var(--line); }
 :root[data-contrast='high'] .app-top { background: #fff; }
 .app-logo { color: var(--ink); text-decoration: none; min-height: 48px; display: inline-flex; align-items: center; }
 .app-main { padding: 20px 16px 132px; max-width: 760px; margin: 0 auto; }

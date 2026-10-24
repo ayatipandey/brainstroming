@@ -298,3 +298,5 @@
 .missing { background: #ffe9a8; color: #3d2c00; padding: 0 4px; border-radius: 4px; font-weight: 700; }
 .legal-other { display: flex; flex-wrap: wrap; gap: 8px 20px; padding-bottom: var(--pad); }
 .legal-other a { min-height: 48px; display: inline-flex; align-items: center; font-weight: 700; color: var(--ink); }
+/* Short link words still get a 48px target */
+.footer-links a, .nav-mobile a, .legal-links a { min-width: 48px; justify-content: center; }
