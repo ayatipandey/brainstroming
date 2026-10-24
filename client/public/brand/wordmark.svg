@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 364 56">
+  <title>Perk Predict</title>
+  <g transform="translate(4 4)">
+    <circle cx="24" cy="24" r="24" fill="#012834"/>
+    <path d="M24 9.5a14.5 14.5 0 1 1-12.56 7.25" fill="none" stroke="#4bcd3e" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="15.6" cy="11.2" r="3.1" fill="#f2a679"/>
+  </g>
+  <text x="64" y="38" font-family="'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', system-ui, sans-serif" font-weight="800" font-size="34" letter-spacing="-1.4" fill="#012834">Perk Predict</text>
+</svg>
